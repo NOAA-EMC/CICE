@@ -70,7 +70,7 @@ endif
 if (! $?DEBUG) then
   setenv ICE_BLDDEBUG false
 else
-  if ($DEBUG != "Y") then
+  if ($DEBUG == "Y") then
     setenv ICE_BLDDEBUG true
   else
     setenv ICE_BLDDEBUG false
