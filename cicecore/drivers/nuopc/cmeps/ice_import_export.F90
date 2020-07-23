@@ -13,8 +13,8 @@ module ice_import_export
   use ice_flux           , only : strairxt, strairyt, strocnxt, strocnyt
   use ice_flux           , only : alvdr, alidr, alvdf, alidf, Tref, Qref, Uref
   use ice_flux           , only : flat, fsens, flwout, evap, fswabs, fhocn, fswthru
-#if (defined NEWCODE)
   use ice_flux           , only : fswthru_vdr, fswthru_vdf, fswthru_idr, fswthru_idf
+#if (defined NEWCODE)
   use ice_flux           , only : send_i2x_per_cat, fswthrun_ai
   use ice_flux           , only : faero_atm, faero_ocn
   use ice_flux           , only : fiso_atm, fiso_ocn, fiso_rain, fiso_evap
@@ -907,7 +907,6 @@ contains
     ! ----
 
     ! surface temperature of ice covered portion (degK)
-    !call state_setexport(exportState, 'sea_ice_temperature', input=Tsrf , lmask=tmask, ifrac=ailohi, rc=rc)
     call state_setexport(exportState, 'sea_ice_surface_temperature', input=Tsrf , lmask=tmask, ifrac=ailohi, rc=rc)
     if (ChkErr(rc,__LINE__,u_FILE_u)) return
 
@@ -1005,7 +1004,6 @@ contains
     call state_setexport(exportState, 'mean_sw_pen_to_ocn' , input=fswthru, lmask=tmask, ifrac=ailohi, rc=rc)
     if (ChkErr(rc,__LINE__,u_FILE_u)) return
 
-#if (defined NEWCODE)
     ! flux of vis dir shortwave through ice to ocean
     call state_setexport(exportState, 'mean_sw_pen_to_ocn_vis_dir_flx' , input=fswthru_vdr, lmask=tmask, ifrac=ailohi, rc=rc)
     if (ChkErr(rc,__LINE__,u_FILE_u)) return
@@ -1021,7 +1019,6 @@ contains
     ! flux of ir dif shortwave through ice to ocean
     call state_setexport(exportState, 'mean_sw_pen_to_ocn_ir_dif_flx' , input=fswthru_idf, lmask=tmask, ifrac=ailohi, rc=rc)
     if (ChkErr(rc,__LINE__,u_FILE_u)) return
-#endif
 
     ! heat exchange with ocean
     call state_setexport(exportState, 'net_heat_flx_to_ocn' , input=fhocn, lmask=tmask, ifrac=ailohi, rc=rc)

@@ -602,6 +602,7 @@ contains
           write(nu_diag,*) trim(subname),' cice calendar_type = ',trim(calendar_type)
        endif
 
+#ifdef CESMCOUPLED
        if (calendar_type == "GREGORIAN" .or. &
            calendar_type == "Gregorian" .or. &
            calendar_type == "gregorian") then
@@ -609,6 +610,7 @@ contains
        else
           call time2sec(iyear-year_init,month,mday,time)
        endif
+#endif
        time = time+start_tod
     end if
 
