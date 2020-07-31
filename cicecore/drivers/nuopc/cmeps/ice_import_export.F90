@@ -34,7 +34,7 @@ module ice_import_export
   use ice_shr_methods    , only : chkerr, state_reset
   use icepack_intfc      , only : icepack_warnings_flush, icepack_warnings_aborted
   use icepack_intfc      , only : icepack_query_parameters, icepack_query_tracer_flags
-  !use icepack_intfc      , only : icepack_liquidus_temperature
+  use icepack_intfc      , only : icepack_liquidus_temperature
   use icepack_intfc      , only : icepack_sea_freezing_temperature
 
   use cice_wrapper_mod    , only : t_startf, t_stopf, t_barrierf
@@ -707,8 +707,6 @@ contains
     do iblk = 1, nblocks
        do j = 1,ny_block
           do i = 1,nx_block
-             !TODO: tcx should this be icepack_sea_freezing_temperature?
-             !Tf (i,j,iblk) = icepack_liquidus_temperature(sss(i,j,iblk))
             Tf(i,j,iblk) = icepack_sea_freezing_temperature(sss(i,j,iblk))
           end do
        end do
