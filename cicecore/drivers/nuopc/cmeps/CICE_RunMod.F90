@@ -544,9 +544,12 @@
                             evap     (:,:,iblk),                     &
                             Tref     (:,:,iblk), Qref    (:,:,iblk), &
                             fresh    (:,:,iblk), fsalt   (:,:,iblk), &
-                            fhocn    (:,:,iblk), fswthru (:,:,iblk), &
-                            fswthru_vdr(:,:,iblk), fswthru_vdf(:,:,iblk), &
-                            fswthru_idr(:,:,iblk), fswthru_idf(:,:,iblk), &
+                            fhocn    (:,:,iblk),                     &
+                            fswthru  (:,:,iblk),                     &
+                            fswthru_vdr(:,:,iblk),                   &
+                            fswthru_vdf(:,:,iblk),                   &
+                            fswthru_idr(:,:,iblk),                   &
+                            fswthru_idf(:,:,iblk),                   &
                             faero_ocn(:,:,:,iblk),                   &
                             alvdr    (:,:,iblk), alidr   (:,:,iblk), &
                             alvdf    (:,:,iblk), alidf   (:,:,iblk), &

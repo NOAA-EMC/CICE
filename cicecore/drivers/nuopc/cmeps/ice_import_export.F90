@@ -16,10 +16,10 @@ module ice_import_export
   use ice_flux           , only : fswthru_vdr, fswthru_vdf, fswthru_idr, fswthru_idf
 #if (defined NEWCODE)
   use ice_flux           , only : send_i2x_per_cat, fswthrun_ai
-  use ice_flux           , only : faero_atm, faero_ocn
-  use ice_flux           , only : fiso_atm, fiso_ocn, fiso_rain, fiso_evap
-  use ice_flux           , only : Qa_iso, Qref_iso, HDO_ocn, H2_18O_ocn, H2_16O_ocn
 #endif
+  use ice_flux_bgc       , only : faero_atm, faero_ocn
+  use ice_flux_bgc       , only : fiso_atm, fiso_ocn, fiso_evap
+  use ice_flux_bgc       , only : Qa_iso, Qref_iso, HDO_ocn, H2_18O_ocn, H2_16O_ocn
   use ice_flux           , only : fresh, fsalt, zlvl, uatm, vatm, potT, Tair, Qa
   use ice_flux           , only : rhoa, swvdr, swvdf, swidr, swidf, flw, frain
   use ice_flux           , only : fsnow, uocn, vocn, sst, ss_tltx, ss_tlty, frzmlt
@@ -578,7 +578,6 @@ contains
     ! Get aerosols from mediator
     !-------------------------------------------------------
 
-#if (defined NEWCODE)
     if (State_FldChk(importState, 'Faxa_bcph')) then
        ! the following indices are based on what the atmosphere is sending
        ! bcphidry  ungridded_index=1
@@ -614,7 +613,6 @@ contains
        call state_getimport(importState, 'Faxa_dstdry', output=faero_atm,  index=3, do_sum=.true., ungridded_index=4, rc=rc)
        if (ChkErr(rc,__LINE__,u_FILE_u)) return
     end if
-#endif
 
     !-------------------------------------------------------
     ! Water isotopes from the mediator
@@ -624,7 +622,6 @@ contains
     ! 18O => ungridded_index=2
     ! HDO => ungridded_index=3
 
-#if (defined NEWCODE)
     if (State_FldChk(importState, 'shum_wiso')) then
        call state_getimport(importState, 'inst_spec_humid_height_lowest_wiso', output=Qa_iso, index=1, ungridded_index=3, rc=rc)
        if (ChkErr(rc,__LINE__,u_FILE_u)) return
@@ -633,12 +630,12 @@ contains
        call state_getimport(importState, 'inst_spec_humid_height_lowest_wiso', output=Qa_iso, index=3, ungridded_index=2, rc=rc)
        if (ChkErr(rc,__LINE__,u_FILE_u)) return
 
-       call state_getimport(importState, 'mean_prec_rate_wiso', output=fiso_rain, index=1, ungridded_index=3, rc=rc)
-       if (ChkErr(rc,__LINE__,u_FILE_u)) return
-       call state_getimport(importState, 'mean_prec_rate_wiso', output=fiso_rain, index=2, ungridded_index=1, rc=rc)
-       if (ChkErr(rc,__LINE__,u_FILE_u)) return
-       call state_getimport(importState, 'mean_prec_rate_wiso', output=fiso_rain, index=3, ungridded_index=2, rc=rc)
-       if (ChkErr(rc,__LINE__,u_FILE_u)) return
+!      call state_getimport(importState, 'mean_prec_rate_wiso', output=fiso_rain, index=1, ungridded_index=3, rc=rc)
+!      if (ChkErr(rc,__LINE__,u_FILE_u)) return
+!      call state_getimport(importState, 'mean_prec_rate_wiso', output=fiso_rain, index=2, ungridded_index=1, rc=rc)
+!      if (ChkErr(rc,__LINE__,u_FILE_u)) return
+!      call state_getimport(importState, 'mean_prec_rate_wiso', output=fiso_rain, index=3, ungridded_index=2, rc=rc)
+!      if (ChkErr(rc,__LINE__,u_FILE_u)) return
 
        call state_getimport(importState, 'mean_fprec_rate_wiso', output=fiso_atm, index=1, ungridded_index=3, rc=rc)
        if (ChkErr(rc,__LINE__,u_FILE_u)) return
@@ -654,7 +651,6 @@ contains
        call state_getimport(importState, 'So_roce_wiso', output=H2_18O_ocn, ungridded_index=2, rc=rc)
        if (ChkErr(rc,__LINE__,u_FILE_u)) return
     end if
-#endif
 
     !-----------------------------------------------------------------
     ! rotate zonal/meridional vectors to local coordinates
@@ -1049,7 +1045,6 @@ contains
     call state_setexport(exportState, 'stress_on_ocn_ice_merid' , input=tauyo, lmask=tmask, ifrac=ailohi, rc=rc)
     if (ChkErr(rc,__LINE__,u_FILE_u)) return
 
-#if (defined NEWCODE)
     ! ------
     ! optional aerosol fluxes to ocean
     ! ------
@@ -1120,6 +1115,7 @@ contains
        if (ChkErr(rc,__LINE__,u_FILE_u)) return
     endif
 
+#if (defined NEWCODE)
     ! ------
     ! optional short wave penetration to ocean ice category
     ! ------
