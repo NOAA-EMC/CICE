@@ -86,7 +86,7 @@ module ice_comp_nuopc
   character(len=*),parameter   :: shr_cal_noleap    = 'NO_LEAP'
   character(len=*),parameter   :: shr_cal_gregorian = 'GREGORIAN'
 
-  integer     , parameter      :: dbug = 0
+  integer                      :: dbug = 0
   integer     , parameter      :: debug_import = 0 ! internal debug level
   integer     , parameter      :: debug_export = 0 ! internal debug level
   character(*), parameter      :: modName =  "(ice_comp_nuopc)"
@@ -885,7 +885,7 @@ contains
     ! diagnostics
     !--------------------------------
 
-    if (dbug > 1) then
+    if (dbug > 0) then
        call state_diagnose(exportState,subname//':ES',rc=rc)
        if (ChkErr(rc,__LINE__,u_FILE_u)) return
     endif
@@ -1083,7 +1083,7 @@ contains
             idate, sec, nu_diag, rc=rc)
        if (ChkErr(rc,__LINE__,u_FILE_u)) return
     end if
-    if (dbug > 1) then
+    if (dbug > 0) then
        call state_diagnose(importState,subname//':IS',rc=rc)
        if (ChkErr(rc,__LINE__,u_FILE_u)) return
     end if
@@ -1110,7 +1110,7 @@ contains
             idate, sec, nu_diag, rc=rc)
        if (ChkErr(rc,__LINE__,u_FILE_u)) return
     end if
-    if (dbug > 1) then
+    if (dbug > 0) then
        call state_diagnose(exportState,subname//':ES',rc=rc)
        if (ChkErr(rc,__LINE__,u_FILE_u)) return
     end if
