@@ -86,7 +86,7 @@ module ice_comp_nuopc
   character(len=*),parameter   :: shr_cal_noleap    = 'NO_LEAP'
   character(len=*),parameter   :: shr_cal_gregorian = 'GREGORIAN'
 
-  integer     , parameter      :: dbug = 10
+  integer     , parameter      :: dbug = 0
   integer     , parameter      :: debug_import = 0 ! internal debug level
   integer     , parameter      :: debug_export = 0 ! internal debug level
   character(*), parameter      :: modName =  "(ice_comp_nuopc)"
@@ -235,6 +235,14 @@ contains
        call ESMF_LogWrite(trim(subname)//' : flds_scalar_index_nextsw_cday = '//trim(logmsg), ESMF_LOGMSG_INFO)
        if (ChkErr(rc,__LINE__,u_FILE_u)) return
     endif
+
+    call NUOPC_CompAttributeGet(gcomp, name='dbug_flag', value=cvalue, isPresent=isPresent, isSet=isSet, rc=rc)
+    if (ChkErr(rc,__LINE__,u_FILE_u)) return
+    if (isPresent .and. isSet) then
+     read(cvalue,*) dbug
+    end if
+    write(logmsg,'(i6)') dbug
+    call ESMF_LogWrite('CICE_cap: dbug = '//trim(logmsg), ESMF_LOGMSG_INFO)
 
     call ice_advertise_fields(gcomp, importState, exportState, flds_scalar_name, rc)
     if (ChkErr(rc,__LINE__,u_FILE_u)) return
