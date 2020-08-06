@@ -36,7 +36,6 @@ module ice_import_export
   use icepack_intfc      , only : icepack_query_parameters, icepack_query_tracer_flags
   use icepack_intfc      , only : icepack_liquidus_temperature
   use icepack_intfc      , only : icepack_sea_freezing_temperature
-
   use cice_wrapper_mod    , only : t_startf, t_stopf, t_barrierf
 #ifdef CESMCOUPLED
   use shr_frz_mod        , only : shr_frz_freezetemp
