@@ -17,11 +17,11 @@ setenv OBJDIR $EXEDIR/compile           ; if !(-d $OBJDIR) mkdir -p $OBJDIR
 setenv THRD     no        # set to yes for OpenMP threading
 
 if (${MACHINE_ID} =~ cheyenne*) then
-  setenv MACHINE_ID cheyenne_intel
+  setenv ARCH cheyenne_intel
 else if (${MACHINE_ID} =~ orion*) then
-  setenv MACHINE_ID orion_intel
+  setenv ARCH orion_intel
 else if (${MACHINE_ID} =~ hera*) then
-  setenv MACHINE_ID hera_intel
+  setenv ARCH hera_intel
 else if (${MACHINE_ID} =~ wcoss_dell_p3*) then
   setenv ARCH wcoss_dell_p3_intel
 else
