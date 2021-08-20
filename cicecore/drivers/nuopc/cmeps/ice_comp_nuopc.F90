@@ -1127,7 +1127,7 @@ contains
 
     if (dbug > 5) call ESMF_LogWrite(subname//' done', ESMF_LOGMSG_INFO)
 
-  if(profile_memory) call ESMF_VMLogMemInfo("Leaving CICE Model_ADVANCE: ")
+    if(profile_memory) call ESMF_VMLogMemInfo("Leaving CICE Model_ADVANCE: ")
 
   end subroutine ModelAdvance
 
