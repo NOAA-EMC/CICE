@@ -160,6 +160,7 @@ contains
     integer, intent(out)  :: rc
 
     logical                      :: isPresent, isSet
+    character(len=64)            :: value
     character(len=char_len_long) :: logmsg
     !--------------------------------
 
