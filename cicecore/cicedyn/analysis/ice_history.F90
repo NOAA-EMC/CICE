@@ -3,7 +3,8 @@
 !
 ! The following variables are currently hard-wired as snapshots
 !   (instantaneous rather than time-averages):
-!   divu, shear, sig1, sig2, sigP, trsig, mlt_onset, frz_onset, hisnap, aisnap
+!   divu, shear, vort, sig1, sig2, sigP, trsig, mlt_onset,
+!   frz_onset, hisnap, aisnap
 !
 ! Options for histfreq: '1','h','d','m','y','x', where x means that
 !   output stream will not be used (recommended for efficiency).
@@ -446,6 +447,14 @@
       if (f_Tsnz (1:1) /= 'x')                          f_VGRDs = .true.
       if (tr_fsd)                                       f_NFSD  = .true.
 
+      call broadcast_scalar (f_tlon, master_task)
+      call broadcast_scalar (f_tlat, master_task)
+      call broadcast_scalar (f_ulon, master_task)
+      call broadcast_scalar (f_ulat, master_task)
+      call broadcast_scalar (f_nlon, master_task)
+      call broadcast_scalar (f_nlat, master_task)
+      call broadcast_scalar (f_elon, master_task)
+      call broadcast_scalar (f_elat, master_task)
       call broadcast_scalar (f_tmask, master_task)
       call broadcast_scalar (f_umask, master_task)
       call broadcast_scalar (f_nmask, master_task)
@@ -597,6 +606,7 @@
       call broadcast_scalar (f_strength, master_task)
       call broadcast_scalar (f_divu, master_task)
       call broadcast_scalar (f_shear, master_task)
+      call broadcast_scalar (f_vort, master_task)
       call broadcast_scalar (f_sig1, master_task)
       call broadcast_scalar (f_sig2, master_task)
       call broadcast_scalar (f_sigP, master_task)
@@ -1312,13 +1322,18 @@
 
          call define_hist_field(n_divu,"divu","%/day",tstr2D, tcstr, &
              "strain rate (divergence)",                           &
-             "none", secday*c100, c0,                              &
+             "divu is instantaneous, on T grid", secday*c100, c0,                              &
              ns1, f_divu)
 
          call define_hist_field(n_shear,"shear","%/day",tstr2D, tcstr, &
              "strain rate (shear)",                                  &
-             "none", secday*c100, c0,                                &
+             "shear is instantaneous, on T grid", secday*c100, c0,                                &
              ns1, f_shear)
+
+         call define_hist_field(n_vort,"vort","%/day",tstr2D, tcstr, &
+             "strain rate (vorticity)",                                  &
+             "vort is instantaneous, on T grid", secday*c100, c0,                                &
+             ns1, f_vort)
 
          select case (grid_ice)
          case('B')
@@ -1965,6 +1980,21 @@
 
       ! floe size distribution
        call init_hist_fsd_4Df
+
+      !-----------------------------------------------------------------
+      ! fill icoord array with namelist values
+      !-----------------------------------------------------------------
+
+       icoord=.true.
+
+       icoord(n_tlon   ) = f_tlon
+       icoord(n_tlat   ) = f_tlat
+       icoord(n_ulon   ) = f_ulon
+       icoord(n_ulat   ) = f_ulat
+       icoord(n_nlon   ) = f_nlon
+       icoord(n_nlat   ) = f_nlat
+       icoord(n_elon   ) = f_elon
+       icoord(n_elat   ) = f_elat
 
       !-----------------------------------------------------------------
       ! fill igrd array with namelist values
@@ -2623,7 +2653,7 @@
          if (f_strength(1:1)/= 'x') &
              call accum_hist_field(n_strength,iblk, strength(:,:,iblk), a2D)
 
-! The following fields (divu, shear, sig1, and sig2) will be smeared
+! The following fields (divu, shear, vort, sig1, and sig2) will be smeared
 !  if averaged over more than a few days.
 ! Snapshots may be more useful (see below).
 
@@ -2631,6 +2661,8 @@
 !             call accum_hist_field(n_divu,    iblk, divu(:,:,iblk), a2D)
 !        if (f_shear  (1:1) /= 'x') &
 !             call accum_hist_field(n_shear,   iblk, shear(:,:,iblk), a2D)
+!        if (f_vort  (1:1) /= 'x') &
+!             call accum_hist_field(n_vort,    iblk, vort(:,:,iblk), a2D)
 !        if (f_sig1   (1:1) /= 'x') &
 !             call accum_hist_field(n_sig1,    iblk, sig1(:,:,iblk), a2D)
 !        if (f_sig2   (1:1) /= 'x') &
@@ -3967,6 +3999,7 @@
               if (.not. tmask(i,j,iblk)) then ! mask out land points
                  if (n_divu     (ns) /= 0) a2D(i,j,n_divu(ns),     iblk) = spval_dbl
                  if (n_shear    (ns) /= 0) a2D(i,j,n_shear(ns),    iblk) = spval_dbl
+                 if (n_vort     (ns) /= 0) a2D(i,j,n_vort(ns),     iblk) = spval_dbl
                  if (n_sig1     (ns) /= 0) a2D(i,j,n_sig1(ns),     iblk) = spval_dbl
                  if (n_sig2     (ns) /= 0) a2D(i,j,n_sig2(ns),     iblk) = spval_dbl
                  if (n_sigP     (ns) /= 0) a2D(i,j,n_sigP(ns),     iblk) = spval_dbl
@@ -3996,6 +4029,8 @@
                        divu (i,j,iblk)*avail_hist_fields(n_divu(ns))%cona
                  if (n_shear    (ns) /= 0) a2D(i,j,n_shear(ns),iblk)     = &
                        shear(i,j,iblk)*avail_hist_fields(n_shear(ns))%cona
+                 if (n_vort     (ns) /= 0) a2D(i,j,n_vort(ns),iblk)      = &
+                       vort(i,j,iblk)*avail_hist_fields(n_vort(ns))%cona
                  if (n_sig1     (ns) /= 0) a2D(i,j,n_sig1(ns),iblk)      = &
                        sig1 (i,j,iblk)*avail_hist_fields(n_sig1(ns))%cona
                  if (n_sig2     (ns) /= 0) a2D(i,j,n_sig2(ns),iblk)      = &

@@ -4,7 +4,8 @@
 !
 ! The following variables are currently hard-wired as snapshots
 !   (instantaneous rather than time-averages):
-!   divu, shear, sig1, sig2, sigP, trsig, mlt_onset, frz_onset, hisnap, aisnap
+!   divu, shear, vort, sig1, sig2, sigP, trsig, mlt_onset,
+!   frz_onset, hisnap, aisnap
 !
 ! Options for histfreq: '1','h','d','m','y','x', where x means that
 !   output stream will not be used (recommended for efficiency).
@@ -48,14 +49,22 @@
          history_dir   , & ! directory name for history file
          incond_dir        ! directory for snapshot initial conditions
 
-      character (len=char_len_long), public :: &
-         pointer_file      ! input pointer file for restarts
-
       character (len=char_len), public :: &
          version_name
 
       character (len=char_len), public :: &
-         history_format
+         history_format      , & ! history format, cdf1, cdf2, cdf5, etc
+         history_rearranger      ! history file rearranger, box or subset for pio
+
+      character (len=char_len), public :: &
+         hist_suffix(max_nstrm)  ! appended to 'h' in filename when not 'x'
+
+      integer (kind=int_kind), public :: &
+         history_iotasks     , & ! iotasks, root, stride defines io pes for pio
+         history_root        , & ! iotasks, root, stride defines io pes for pio
+         history_stride      , & ! iotasks, root, stride defines io pes for pio
+         history_deflate     , & ! compression level for hdf5/netcdf4
+         history_chunksize(2) ! chunksize for hdf5/netcdf4
 
       character (len=char_len), public :: &
          hist_suffix(max_nstrm)  ! appended to 'h' in filename when not 'x'
@@ -125,6 +134,7 @@
          avail_hist_fields(max_avail_hist_fields)
 
       integer (kind=int_kind), parameter, public :: &
+         ncoord   = 8           , & ! number of coordinate variables: TLON, TLAT, ULON, ULAT, NLON, NLAT, ELON, ELAT
          nvar_grd = 21          , & ! number of grid fields that can be written
                                     !   excluding grid vertices
          nvar_grdz = 6              ! number of category/vertical grid fields written
@@ -159,6 +169,7 @@
          avgct(max_nstrm)   ! average sample counter
 
       logical (kind=log_kind), public :: &
+         icoord(ncoord) , &    ! true if coord field is written to output file
          igrd (nvar_grd), &    ! true if grid field is written to output file
          igrdz(nvar_grdz)      ! true if category/vertical grid field is written
 
@@ -188,6 +199,10 @@
       !---------------------------------------------------------------
 
       logical (kind=log_kind), public :: &
+           f_tlon      = .true., f_tlat       = .true., &
+           f_ulon      = .true., f_ulat       = .true., &
+           f_nlon      = .true., f_nlat       = .true., &
+           f_elon      = .true., f_elat       = .true., &
            f_tmask     = .true., f_umask      = .true., &
            f_nmask     = .true., f_emask      = .true., &
            f_blkmask   = .true., &
@@ -267,7 +282,7 @@
            f_strocnxE  = 'x', f_strocnyE   = 'x', &
            f_strintxE  = 'x', f_strintyE   = 'x', &
            f_taubxE    = 'x', f_taubyE     = 'x', &
-           f_strength  = 'm', &
+           f_strength  = 'm', f_vort       = 'm', &
            f_divu      = 'm', f_shear      = 'm', &
            f_sig1      = 'm', f_sig2       = 'm', &
            f_sigP      = 'm', &
@@ -356,6 +371,10 @@
       !---------------------------------------------------------------
 
       namelist / icefields_nml /     &
+           f_tlon     , f_tlat     , &
+           f_ulon     , f_ulat     , &
+           f_nlon     , f_nlat     , &
+           f_elon     , f_elat     , &
            f_tmask    , f_umask    , &
            f_nmask    , f_emask    , &
            f_blkmask  , &
@@ -434,7 +453,7 @@
 !          f_strocnxE,  f_strocnyE , &
 !          f_strintxE,  f_strintyE , &
 !          f_taubxE,    f_taubyE   , &
-           f_strength,  &
+           f_strength,  f_vort     , &
            f_divu,      f_shear    , &
            f_sig1,      f_sig2     , &
            f_sigP,      &
@@ -523,6 +542,15 @@
       !---------------------------------------------------------------
 
       integer (kind=int_kind), parameter, public :: &
+           n_tlon       = 1,  &
+           n_tlat       = 2,  &
+           n_ulon       = 3,  &
+           n_ulat       = 4,  &
+           n_nlon       = 5,  &
+           n_nlat       = 6,  &
+           n_elon       = 7,  &
+           n_elat       = 8,  &
+
            n_tmask      = 1,  &
            n_umask      = 2,  &
            n_nmask      = 3,  &
@@ -626,7 +654,7 @@
            n_strocnxE   , n_strocnyE   , &
            n_strintxE   , n_strintyE   , &
            n_taubxE     , n_taubyE     , &
-           n_strength   , &
+           n_strength   , n_vort       , &
            n_divu       , n_shear      , &
            n_sig1       , n_sig2       , &
            n_sigP       , &
