@@ -10,25 +10,6 @@ module ice_prescribed_mod
   use ESMF, only : ESMF_Clock, ESMF_Mesh, ESMF_SUCCESS, ESMF_FAILURE
   use ESMF, only : ESMF_LogFoundError, ESMF_LOGERR_PASSTHRU, ESMF_Finalize, ESMF_END_ABORT
 
-#ifndef CESMCOUPLED
-
-  use ice_kinds_mod
-  implicit none
-  private ! except
-  public  :: ice_prescribed_init      ! initialize input data stream
-  logical(kind=log_kind), parameter, public :: prescribed_ice = .false.     ! true if prescribed ice
-contains
-  ! This is a stub routine for now
-  subroutine ice_prescribed_init(clock, mesh, rc)
-    type(ESMF_Clock)       , intent(in)  :: clock
-    type(ESMF_Mesh)        , intent(in)  :: mesh
-    integer                , intent(out) :: rc
-    ! do nothing
-    rc = ESMF_SUCCESS
-  end subroutine ice_prescribed_init
-
-#else
-
   use ice_kinds_mod
   use shr_nl_mod       , only : shr_nl_find_group_name
   use dshr_strdata_mod , only : shr_strdata_type, shr_strdata_print
@@ -488,7 +469,5 @@ contains
     call init_flux_ocn
 
   end subroutine ice_prescribed_phys
-
-#endif
 
 end module ice_prescribed_mod
