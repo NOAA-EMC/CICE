@@ -176,7 +176,7 @@ contains
             stream_yearLast     = stream_yearLast,           &
             stream_yearAlign    = stream_yearAlign ,         &
             stream_offset       = 0,                         &
-            stream_taxmode      = 'cycle',                   &
+            stream_taxmode      = 'extend',                  &
             stream_dtlimit      = 1.5_dbl_kind,              &
             stream_tintalgo     = 'linear',                  &
             rc                  = rc)
