@@ -59,7 +59,10 @@ contains
 
     ! Prescribed ice initialization
 
-    include 'mpif.h'
+    #ifndef SERIAL_REMOVE_MPI
+    !TODO: add 1d character array to cicecore/cicedyn/infrastructure/comm/mpi/ice_broadcast.F90
+    use mpi   ! MPI Fortran module
+    #endif
 
     ! input/output parameters
     type(ESMF_Clock)       , intent(in)  :: clock
