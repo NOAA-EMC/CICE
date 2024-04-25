@@ -7,7 +7,7 @@ module ice_prescribed_mod
   ! Ice/ocean fluxes are set to zero, and ice dynamics are not calculated.
   ! Regridding and data cycling capabilities are included.
 
-  use ESMF, only : ESMF_Clock, ESMF_Mesh, ESMF_SUCCESS, ESMF_FAILURE
+  use ESMF, only : ESMF_GridComp, ESMF_Clock, ESMF_Mesh, ESMF_SUCCESS, ESMF_FAILURE
   use ESMF, only : ESMF_LogFoundError, ESMF_LOGERR_PASSTHRU, ESMF_Finalize, ESMF_END_ABORT
 
   use ice_kinds_mod
@@ -15,6 +15,7 @@ module ice_prescribed_mod
   use dshr_strdata_mod , only : shr_strdata_type, shr_strdata_print
   use dshr_strdata_mod , only : shr_strdata_init_from_inline, shr_strdata_advance
   use dshr_methods_mod , only : dshr_fldbun_getfldptr
+  use dshr_mod         , only : dshr_pio_init
   use ice_broadcast
   use ice_communicate   , only : my_task, master_task, MPI_COMM_ICE
   use ice_fileunits
@@ -55,7 +56,7 @@ module ice_prescribed_mod
 contains
 !===============================================================================
 
-  subroutine ice_prescribed_init(clock, mesh, rc)
+  subroutine ice_prescribed_init(gcomp, clock, mesh, rc)
 
     ! Prescribed ice initialization
 
@@ -65,6 +66,7 @@ contains
     #endif
 
     ! input/output parameters
+    type(ESMF_GridComp)    , intent(in)  :: gcomp
     type(ESMF_Clock)       , intent(in)  :: clock
     type(ESMF_Mesh)        , intent(in)  :: mesh
     integer                , intent(out) :: rc
@@ -161,6 +163,10 @@ contains
           end do
           write(nu_diag,*) ' '
        endif
+
+#ifndef CESMCOUPLED
+       call dshr_pio_init(gcomp, sdat, nu_diag, rc)
+#endif
 
        ! initialize sdat
        call shr_strdata_init_from_inline(sdat,               &
