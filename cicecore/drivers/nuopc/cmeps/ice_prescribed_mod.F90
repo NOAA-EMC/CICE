@@ -113,7 +113,7 @@ contains
     stream_meshfile     = ' '
     stream_datafiles(:) = ' '
     stream_mapalgo      = 'bilinear'
-    stream_mapalgo      = 'cycle'
+    stream_taxmode      = 'cycle'
 
     ! read namelist on master task
     if (my_task == master_task) then
@@ -162,6 +162,7 @@ contains
           write(nu_diag,F00) '  stream_meshfile  = ',trim(stream_meshfile)
           write(nu_diag,F00) '  stream_varname   = ',trim(stream_varname)
           write(nu_diag,F00) '  stream_mapalgo   = ',trim(stream_mapalgo)
+          write(nu_diag,F00) '  stream_taxmode   = ',trim(stream_taxmode)
           do n = 1,nFile
              write(nu_diag,F00) '  stream_datafiles   = ',trim(stream_dataFiles(n))
           end do
