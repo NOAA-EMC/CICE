@@ -79,6 +79,7 @@ contains
     character(len=char_len_long)     :: stream_dataFiles(nFilesMaximum)
     character(len=char_len_long)     :: stream_varname
     character(len=char_len_long)     :: stream_mapalgo
+    character(len=char_len_long)     :: stream_taxmode
     integer(kind=int_kind)           :: stream_yearfirst   ! first year in stream to use
     integer(kind=int_kind)           :: stream_yearlast    ! last year in stream to use
     integer(kind=int_kind)           :: stream_yearalign   ! align stream_year_first
@@ -96,6 +97,7 @@ contains
          stream_varname ,               &
          stream_datafiles,              &
          stream_mapalgo,                &
+         stream_taxmode,                &
          stream_yearalign,              &
          stream_yearfirst ,             &
          stream_yearlast
@@ -111,6 +113,7 @@ contains
     stream_meshfile     = ' '
     stream_datafiles(:) = ' '
     stream_mapalgo      = 'bilinear'
+    stream_mapalgo      = 'cycle'
 
     ! read namelist on master task
     if (my_task == master_task) then
@@ -141,6 +144,7 @@ contains
        call broadcast_scalar(stream_yearlast  , master_task)
        call broadcast_scalar(stream_meshfile  , master_task)
        call broadcast_scalar(stream_mapalgo   , master_task)
+       call broadcast_scalar(stream_taxmode   , master_task)
        call broadcast_scalar(stream_varname   , master_task)
        call mpi_bcast(stream_dataFiles, len(stream_datafiles(1))*NFilesMaximum, MPI_CHARACTER, 0, MPI_COMM_ICE, ierr)
 
@@ -179,13 +183,13 @@ contains
             stream_lev_dimname  = 'null',                    &
             stream_mapalgo      = trim(stream_mapalgo),      &
             stream_filenames    = stream_datafiles(1:nfile), &
-            stream_fldlistFile  = (/'ice_cov'/),             &
-            stream_fldListModel = (/'ice_cov'/),             &
+            stream_fldlistFile  = (/trim(stream_varname)/),  &
+            stream_fldListModel = (/trim(stream_varname)/),  &
             stream_yearFirst    = stream_yearFirst,          &
             stream_yearLast     = stream_yearLast,           &
             stream_yearAlign    = stream_yearAlign ,         &
             stream_offset       = 0,                         &
-            stream_taxmode      = 'extend',                  &
+            stream_taxmode      = trim(stream_taxmode),      &
             stream_dtlimit      = 1.5_dbl_kind,              &
             stream_tintalgo     = 'linear',                  &
             rc                  = rc)
