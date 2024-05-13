@@ -95,6 +95,26 @@ aprun -q -n ${ntasks} -N ${taskpernodelimit} -d ${nthrds} ./cice >&! \$ICE_RUNLO
 EOFR
 
 #=======
+else if (${ICE_MACHCOMP} =~ carpenter*) then 
+if (${ICE_COMMDIR} =~ serial*) then
+cat >> ${jobfile} << EOFR
+./cice >&! \$ICE_RUNLOG_FILE
+EOFR
+else
+
+if (${ICE_ENVNAME} =~ intelimpi* || ${ICE_ENVNAME} =~ gnuimpi*) then
+cat >> ${jobfile} << EOFR
+mpiexec -n ${ntasks} -ppn ${taskpernodelimit} ./cice >&! \$ICE_RUNLOG_FILE
+EOFR
+else
+cat >> ${jobfile} << EOFR
+mpiexec --cpu-bind depth -n ${ntasks} -ppn ${taskpernodelimit} -d ${nthrds} ./cice >&! \$ICE_RUNLOG_FILE
+EOFR
+endif
+
+endif
+
+#=======
 else if (${ICE_MACHCOMP} =~ cori* || ${ICE_MACHCOMP} =~ perlmutter*) then
 if (${ICE_COMMDIR} =~ serial*) then
 cat >> ${jobfile} << EOFR

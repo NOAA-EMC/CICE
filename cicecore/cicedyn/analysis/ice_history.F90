@@ -362,6 +362,7 @@
          f_sidmasslat = 'mxxxx'
          f_sndmasssnf = 'mxxxx'
          f_sndmassmelt = 'mxxxx'
+         f_sndmassdyn = 'mxxxx'
          f_siflswdtop = 'mxxxx'
          f_siflswutop = 'mxxxx'
          f_siflswdbot = 'mxxxx'
@@ -402,6 +403,11 @@
          f_siu = f_CMIP
          f_siv = f_CMIP
          f_sispeed = f_CMIP
+         f_sndmasssubl = f_CMIP
+         f_sndmasssnf = f_CMIP
+         f_sndmassmelt = f_CMIP
+         f_sndmassdyn = f_CMIP
+         f_sidmasssi = f_CMIP
       endif
 
       if (grid_ice == 'CD' .or. grid_ice == 'C') then
@@ -447,6 +453,14 @@
       if (f_Tsnz (1:1) /= 'x')                          f_VGRDs = .true.
       if (tr_fsd)                                       f_NFSD  = .true.
 
+      call broadcast_scalar (f_tlon, master_task)
+      call broadcast_scalar (f_tlat, master_task)
+      call broadcast_scalar (f_ulon, master_task)
+      call broadcast_scalar (f_ulat, master_task)
+      call broadcast_scalar (f_nlon, master_task)
+      call broadcast_scalar (f_nlat, master_task)
+      call broadcast_scalar (f_elon, master_task)
+      call broadcast_scalar (f_elat, master_task)
       call broadcast_scalar (f_tmask, master_task)
       call broadcast_scalar (f_umask, master_task)
       call broadcast_scalar (f_nmask, master_task)
@@ -646,6 +660,7 @@
       call broadcast_scalar (f_sidmasslat, master_task)
       call broadcast_scalar (f_sndmasssnf, master_task)
       call broadcast_scalar (f_sndmassmelt, master_task)
+      call broadcast_scalar (f_sndmassdyn, master_task)
       call broadcast_scalar (f_siflswdtop, master_task)
       call broadcast_scalar (f_siflswutop, master_task)
       call broadcast_scalar (f_siflswdbot, master_task)
@@ -1640,7 +1655,7 @@
              "none", c1, c0,         &
              ns1, f_sidmassevapsubl)
 
-         call define_hist_field(n_sndmasssubl,"sndmassubl","kg m-2 s-1",tstr2D, tcstr,  &
+         call define_hist_field(n_sndmasssubl,"sndmasssubl","kg m-2 s-1",tstr2D, tcstr,  &
              "snow mass change from evaporation and sublimation", &
              "none", c1, c0,         &
              ns1, f_sndmasssubl)
@@ -1669,6 +1684,11 @@
              "snow mass change from snow melt",                      &
              "none", c1, c0,         &
              ns1, f_sndmassmelt)
+
+         call define_hist_field(n_sndmassdyn,"sndmassdyn","kg m-2 s-1",tstr2D, tcstr,  &
+             "snow mass change from dynamics ridging",                      &
+             "none", c1, c0,         &
+             ns1, f_sndmassdyn)
 
          call define_hist_field(n_siflswdtop,"siflswdtop","W/m2",tstr2D, tcstr, &
              "down shortwave flux over sea ice", &
@@ -1974,6 +1994,21 @@
        call init_hist_fsd_4Df
 
       !-----------------------------------------------------------------
+      ! fill icoord array with namelist values
+      !-----------------------------------------------------------------
+
+       icoord=.true.
+
+       icoord(n_tlon   ) = f_tlon
+       icoord(n_tlat   ) = f_tlat
+       icoord(n_ulon   ) = f_ulon
+       icoord(n_ulat   ) = f_ulat
+       icoord(n_nlon   ) = f_nlon
+       icoord(n_nlat   ) = f_nlat
+       icoord(n_elon   ) = f_elon
+       icoord(n_elat   ) = f_elat
+
+      !-----------------------------------------------------------------
       ! fill igrd array with namelist values
       !-----------------------------------------------------------------
 
@@ -2137,7 +2172,7 @@
           taubxN, taubyN, strocnxN, strocnyN, &
           strairxE, strairyE, strtltxE, strtltyE, strintxE, strintyE, &
           taubxE, taubyE, strocnxE, strocnyE, &
-          fmU, fmN, fmE, daidtt, dvidtt, daidtd, dvidtd, fsurf, &
+          fmU, fmN, fmE, daidtt, dvidtt, daidtd, dvidtd, dvsdtd, fsurf, &
           fcondtop, fcondbot, fsurfn, fcondtopn, flatn, fsensn, albcnt, snwcnt, &
           stressp_1, stressm_1, stress12_1, &
           stresspT, stressmT, stress12T, &
@@ -3045,7 +3080,7 @@
            do j = jlo, jhi
            do i = ilo, ihi
               if (aice(i,j,iblk) > puny) then
-                 worka(i,j) = evaps(i,j,iblk)*rhos
+                 worka(i,j) = evaps(i,j,iblk)
               endif
            enddo
            enddo
@@ -3057,7 +3092,7 @@
            do j = jlo, jhi
            do i = ilo, ihi
               if (aice(i,j,iblk) > puny) then
-                 worka(i,j) = aice(i,j,iblk)*fsnow(i,j,iblk)*rhos
+                 worka(i,j) = aice(i,j,iblk)*fsnow(i,j,iblk)
               endif
            enddo
            enddo
@@ -3074,6 +3109,18 @@
            enddo
            enddo
            call accum_hist_field(n_sndmassmelt, iblk, worka(:,:), a2D)
+         endif
+
+         if (f_sndmassdyn(1:1) /= 'x') then
+           worka(:,:) = c0
+           do j = jlo, jhi
+           do i = ilo, ihi
+              if (aice(i,j,iblk) > puny) then
+                 worka(i,j) = dvsdtd(i,j,iblk)*rhos
+              endif
+           enddo
+           enddo
+           call accum_hist_field(n_sndmassdyn, iblk, worka(:,:), a2D)
          endif
 
          if (f_siflswdtop(1:1) /= 'x') then
