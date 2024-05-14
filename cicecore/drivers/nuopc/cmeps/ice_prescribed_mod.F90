@@ -170,6 +170,7 @@ contains
        endif
 
 #ifndef CESMCOUPLED
+       !CESM does this elsewhere
        call dshr_pio_init(gcomp, sdat, nu_diag, rc)
 #endif
 
@@ -206,10 +207,9 @@ contains
           hin_max(1) = 999._dbl_kind
        end if
 
-#ifndef CESMCOUPLED 
        ! If need initial cice values for coupling
        call ice_prescribed_run(idate, msec)
-#endif
+    
     end if  ! end of if prescribed ice mode
 
   end subroutine ice_prescribed_init
