@@ -60,10 +60,10 @@ contains
 
     ! Prescribed ice initialization
 
-    #ifndef SERIAL_REMOVE_MPI
+#ifndef SERIAL_REMOVE_MPI
     !TODO: add 1d character array to cicecore/cicedyn/infrastructure/comm/mpi/ice_broadcast.F90
     use mpi   ! MPI Fortran module
-    #endif
+#endif
 
     ! input/output parameters
     type(ESMF_GridComp)    , intent(in)  :: gcomp
