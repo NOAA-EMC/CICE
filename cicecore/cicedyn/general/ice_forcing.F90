@@ -5396,10 +5396,9 @@
       if (wave_spec) then
       ! get hardwired frequency bin info and a dummy wave spectrum profile
       ! the latter is used if wave_spec_type == profile
-         call icepack_init_wave(nfreq     = nfreq,    &
-                                wave_spectrum_profile = wave_spectrum_profile, &
-                                wavefreq  = wavefreq, &
-                                dwavefreq = dwavefreq)
+         call icepack_init_wave(nfreq,                 &
+                                wave_spectrum_profile, &
+                                wavefreq, dwavefreq)
 
          ! read more realistic data from a file
          if ((trim(wave_spec_type) == 'constant').OR.(trim(wave_spec_type) == 'random')) then
@@ -5482,10 +5481,10 @@
       if (icepack_warnings_aborted()) call abort_ice(error_message=subname, &
          file=__FILE__, line=__LINE__)
 
-         call icepack_init_wave(nfreq     = nfreq,    &
-                                wave_spectrum_profile = wave_spectrum_profile, &
-                                wavefreq  = wavefreq, &
-                                dwavefreq = dwavefreq)
+         call icepack_init_wave(nfreq,                 &
+                                wave_spectrum_profile, &
+                                wavefreq, dwavefreq)
+
 
       !spec_file = trim(ocn_data_dir)//'/'//trim(wave_spec_file)
       spec_file = trim(wave_spec_file)
