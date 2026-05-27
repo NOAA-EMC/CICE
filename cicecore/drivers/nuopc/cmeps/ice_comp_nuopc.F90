@@ -58,6 +58,7 @@ module ice_comp_nuopc
   use ice_scam           , only : scol_valid, single_column
 #ifndef CESMCOUPLED
   use shr_is_restart_fh_mod, only : init_is_restart_fh, is_restart_fh, is_restart_fh_type
+  use shr_is_restart_fh_mod, only : log_restart_fh
 #endif
 
   implicit none
@@ -1009,6 +1010,8 @@ contains
     !---------------------------------------------------------------------------
     ! Run CICE
     !---------------------------------------------------------------------------
+    use ice_calendar,       only: write_history, histfreq, nstreams
+    use ice_history_shared, only: history_dir
 
     ! Arguments
     type(ESMF_GridComp)  :: gcomp
@@ -1042,6 +1045,7 @@ contains
     logical                    :: isPresent, isSet
 #ifndef CESMCOUPLED
     logical                    :: write_restartfh
+    integer                    :: ns
 #endif
     character(len=*),parameter :: subname=trim(modName)//':(ModelAdvance) '
     character(char_len_long)   :: msgString
@@ -1227,6 +1231,20 @@ contains
     if(profile_memory) call ESMF_VMLogMemInfo("Entering CICE_Run : ")
     call CICE_Run()
     if(profile_memory) call ESMF_VMLogMemInfo("Leaving CICE_Run : ")
+
+#ifndef CESMCOUPLED
+    if (mastertask) then
+       do ns = 1, nstreams
+          if (write_history(ns) .and. histfreq(ns) .eq. 'h') then
+             call ESMF_ClockGetNextTime(clock, nextTime=nextTime, rc=rc)
+             if (ChkErr(rc,__LINE__,u_FILE_u)) return
+             call log_restart_fh(nextTime, startTime, 'ice', output_dir=history_dir, rc=rc)
+             if (ChkErr(rc,__LINE__,u_FILE_u)) return
+             exit
+          end if
+       end do
+    end if
+#endif
 
     !--------------------------------
     ! Create export state

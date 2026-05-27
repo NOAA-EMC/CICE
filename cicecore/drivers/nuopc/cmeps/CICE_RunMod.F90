@@ -16,7 +16,6 @@
 
       use ice_kinds_mod
       use cice_wrapper_mod, only : t_startf, t_stopf, t_barrierf
-      use cice_wrapper_mod, only : ufs_logfhour
       use ice_fileunits, only: nu_diag
       use ice_arrays_column, only: oceanmixed_ice
       use ice_constants, only: c0, c1
@@ -388,15 +387,6 @@
          endif
 
          call ice_timer_stop(timer_readwrite)  ! reading/writing
-         if (my_task == master_task) then
-            do ns = 1,nstreams
-               if (write_history(ns) .and. histfreq(ns) .eq. 'h') then
-                  call calendar_sec2hms(msec,hh,mm,ss)
-                  write(logmsg,'(6(i4,2x))')myear,mmonth,mday,hh,mm,ss
-                  call ufs_logfhour(trim(logmsg),timesecs/c3600)
-               end if
-            end do
-         end if
       end subroutine ice_step
 
 !=======================================================================
