@@ -181,7 +181,7 @@ contains
     call fldlist_add(fldsToIce_num, fldsToIce, 'So_u'    )
     call fldlist_add(fldsToIce_num, fldsToIce, 'So_v'    )
     call fldlist_add(fldsToIce_num, fldsToIce, 'Fioo_q'  )
-    call fldlist_add(fldsToIce_num, fldsToIce, 'So_h' )
+    call fldlist_add(fldsToIce_num, fldsToIce, 'So_hmix' )
     if (flds_wiso) then
        call fldlist_add(fldsToIce_num, fldsToIce, 'So_roce_wiso', ungridded_lbound=1, ungridded_ubound=3)
     end if
@@ -731,7 +731,7 @@ contains
 
     ! Get mixed layer depth from ocean 
 
-    call state_getimport(importState, 'So_h', output=aflds, index=1, rc=rc)
+    call state_getimport(importState, 'So_hmix', output=aflds, index=1, rc=rc)
     if (ChkErr(rc,__LINE__,u_FILE_u)) return
 
     if (.not.prescribed_ice) then
