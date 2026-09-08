@@ -59,6 +59,7 @@ module ice_comp_nuopc
   use ice_scam           , only : scol_valid, single_column
 #ifndef CESMCOUPLED
   use shr_is_restart_fh_mod, only : init_is_restart_fh, is_restart_fh, is_restart_fh_type
+  use shr_is_restart_fh_mod, only : log_restart_fh
 #endif
 #ifdef UFS_TRACING
   use ufs_trace_mod
@@ -104,6 +105,7 @@ module ice_comp_nuopc
   logical                      :: mastertask
   logical                      :: runtimelog = .false.
   logical                      :: restart_eor = .false. !End of run restart flag
+  logical                      :: log_to_output = .false. ! Write logs to CICE output dir
 #ifndef CESMCOUPLED
   type(is_restart_fh_type)     :: restartfh_info     ! For flexible restarts in UFS
 #endif
@@ -571,6 +573,11 @@ contains
        nu_diag_set = .true.
     end if
 
+    call NUOPC_CompAttributeGet(gcomp, name="cice_write_log_to_output_dir", value=cvalue, isPresent=isPresent, isSet=isSet, rc=rc)
+    if (ChkErr(rc,__LINE__,u_FILE_u)) return
+    if (isPresent .and. isSet) then
+       if (trim(cvalue) .eq. '.true.') log_to_output = .true.
+    endif
     !----------------------------------------------------------------------------
     ! First cice initialization phase - before initializing grid info
     !----------------------------------------------------------------------------
@@ -1048,6 +1055,8 @@ contains
     !---------------------------------------------------------------------------
     ! Run CICE
     !---------------------------------------------------------------------------
+    use ice_calendar,       only: write_history, histfreq, nstreams
+    use ice_history_shared, only: history_dir
 
     ! Arguments
     type(ESMF_GridComp)  :: gcomp
@@ -1079,7 +1088,9 @@ contains
     character(char_len_long)   :: restart_filename
     logical                    :: isPresent, isSet
 #ifndef CESMCOUPLED
-    logical                    :: write_restartfh
+    character(len=256), allocatable :: logdir
+    logical                         :: write_restartfh
+    integer                         :: ns
 #endif
     character(len=*),parameter :: subname=trim(modName)//':(ModelAdvance) '
     character(char_len_long)   :: msgString
@@ -1268,6 +1279,24 @@ contains
     if(profile_memory) call ESMF_VMLogMemInfo("Entering CICE_Run : ")
     call CICE_Run()
     if(profile_memory) call ESMF_VMLogMemInfo("Leaving CICE_Run : ")
+
+    !--------------------------------
+    ! Write output logs
+    !--------------------------------
+#ifndef CESMCOUPLED
+    if (log_to_output) logdir=history_dir
+    if (mastertask) then
+       do ns = 1, nstreams
+          if (write_history(ns) .and. histfreq(ns) .eq. 'h') then
+             call ESMF_ClockGetNextTime(clock, nextTime=nextTime, rc=rc)
+             if (ChkErr(rc,__LINE__,u_FILE_u)) return
+             call log_restart_fh(nextTime, startTime, 'ice', output_dir=logdir, rc=rc)
+             if (ChkErr(rc,__LINE__,u_FILE_u)) return
+             exit
+          end if
+       end do
+    end if
+#endif
 
     !--------------------------------
     ! Create export state

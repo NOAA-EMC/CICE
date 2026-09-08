@@ -16,7 +16,6 @@
 
       use ice_kinds_mod
       use cice_wrapper_mod, only : t_startf, t_stopf, t_barrierf
-      use cice_wrapper_mod, only : ufs_logfhour
       use ice_fileunits, only: nu_diag
       use ice_arrays_column, only: oceanmixed_ice
       use ice_constants, only: c0, c1
@@ -111,8 +110,8 @@
       use ice_constants, only: c3600
       use ice_boundary, only: ice_HaloUpdate
       use ice_calendar, only: dt, dt_dyn, ndtd, diagfreq, write_restart, istep
-      use ice_calendar, only: idate, myear, mmonth, mday, msec, timesecs
-      use ice_calendar, only: calendar_sec2hms, write_history, nstreams, histfreq
+      use ice_calendar, only: idate, msec
+      use ice_calendar, only: nstreams
       use ice_diagnostics, only: init_mass_diags, runtime_diags, debug_model, debug_ice
       use ice_diagnostics_bgc, only: hbrine_diags, bgc_diags
       use ice_domain, only: halo_info, nblocks, num_set_boundary_flds
@@ -137,7 +136,7 @@
       use ice_timers, only: ice_timer_start, ice_timer_stop, &
           timer_diags, timer_column, timer_thermo, timer_bound, &
           timer_hist, timer_readwrite
-      use ice_communicate, only: MPI_COMM_ICE, my_task, master_task
+      use ice_communicate, only: MPI_COMM_ICE
       use ice_prescribed_mod
 
       integer (kind=int_kind) :: &
@@ -156,8 +155,6 @@
       character(len=*), parameter :: subname = '(ice_step)'
 
       character (len=char_len) :: plabeld
-      integer (kind=int_kind)  :: hh,mm,ss,ns
-      character (len=char_len) :: logmsg
 
       if (debug_model) then
          plabeld = 'beginning time step'
@@ -396,15 +393,6 @@
          endif
 
          call ice_timer_stop(timer_readwrite)  ! reading/writing
-         if (my_task == master_task) then
-            do ns = 1,nstreams
-               if (write_history(ns) .and. histfreq(ns) .eq. 'h') then
-                  call calendar_sec2hms(msec,hh,mm,ss)
-                  write(logmsg,'(6(i4,2x))')myear,mmonth,mday,hh,mm,ss
-                  call ufs_logfhour(trim(logmsg),timesecs/c3600)
-               end if
-            end do
-         end if
       end subroutine ice_step
 
 !=======================================================================
